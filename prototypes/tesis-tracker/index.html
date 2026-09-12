@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TESIS DISEÑO EDITORIAL</title>
+  <meta name="theme-color" content="#1f2937" />
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-soft: #eef2ff;
+      --line: #d9e2ec;
+      --text: #1e293b;
+      --muted: #64748b;
+      --accent: #4f46e5;
+      --accent-2: #7c3aed;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --pending-bg: #e2e8f0;
+      --shadow: 0 14px 38px rgba(15, 23, 42, 0.08);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --tap: 52px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body { min-height: 100dvh; }
+    button, textarea, input { font: inherit; }
+
+    .app-shell {
+      width: min(100%, 860px);
+      margin: 0 auto;
+      padding: env(safe-area-inset-top) 16px calc(28px + env(safe-area-inset-bottom));
+    }
+
+    .hero {
+      margin: 0 -16px 18px;
+      padding: 28px 18px 22px;
+      border-radius: 0 0 28px 28px;
+      background: linear-gradient(145deg, #111827, #312e81 58%, #6d28d9);
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.12);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .hero h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(30px, 5.5vw, 44px);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+    }
+
+    .hero__text {
+      margin: 0;
+      color: rgba(255,255,255,.84);
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    .hero__stats {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 18px;
+      padding: 14px;
+      backdrop-filter: blur(12px);
+    }
+
+    .stat-card__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .stat-card__label {
+      font-size: 13px;
+      color: rgba(255,255,255,.76);
+    }
+
+    .stat-card__value {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .stat-card__meta {
+      display: block;
+      margin-top: 8px;
+      color: rgba(255,255,255,.82);
+      font-size: 14px;
+    }
+
+    .progress-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.16);
+      overflow: hidden;
+    }
+
+    .progress-bar span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #34d399, #a3e635);
+      transition: width .25s ease;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .toolbar__hint {
+      margin: 0;
+      flex: 1 1 260px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .toolbar__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      min-height: var(--tap);
+      padding: 12px 16px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform .12s ease, background .2s ease, border-color .2s ease;
+    }
+
+    .btn:active { transform: scale(.98); }
+
+    .btn--ghost {
+      background: var(--surface);
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    .btn--accent {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .chapters {
+      display: grid;
+      gap: 14px;
+    }
+
+    .chapter {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .chapter__header {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: auto auto 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .chapter__status {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      color: transparent;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .chapter.is-complete .chapter__status {
+      background: var(--success-bg);
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .chapter__emoji {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--surface-soft);
+      font-size: 22px;
+    }
+
+    .chapter__title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .chapter__meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+
+    .status-pill--pending {
+      background: var(--pending-bg);
+      color: #475569;
+    }
+
+    .status-pill--complete {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .chapter__chevron {
+      color: var(--muted);
+      font-size: 18px;
+      transition: transform .2s ease;
+    }
+
+    .chapter.is-open .chapter__chevron {
+      transform: rotate(180deg);
+    }
+
+    .chapter__body {
+      display: none;
+      border-top: 1px solid var(--line);
+      padding: 0 16px 16px;
+    }
+
+    .chapter.is-open .chapter__body {
+      display: block;
+    }
+
+    .tasks {
+      display: grid;
+      gap: 10px;
+      padding-top: 14px;
+    }
+
+    .task {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #fbfdff;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .task__checkbox {
+      appearance: none;
+      margin: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      position: relative;
+      top: 2px;
+    }
+
+    .task__checkbox:checked {
+      border-color: var(--success);
+      background: var(--success);
+    }
+
+    .task__checkbox:checked::after {
+      content: "✓";
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .task__label {
+      display: block;
+      line-height: 1.4;
+      font-size: 15px;
+    }
+
+    .task.is-done .task__label {
+      color: var(--muted);
+      text-decoration: line-through;
+    }
+
+    .task__meta {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ai-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    .info-btn {
+      min-width: 38px;
+      min-height: 38px;
+      border-radius: 12px;
+      border: 1px solid #c7d2fe;
+      background: #eef2ff;
+      color: #4338ca;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .notes {
+      margin-top: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .notes label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .notes textarea {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: #fff;
+      color: var(--text);
+      padding: 14px;
+      line-height: 1.5;
+    }
+
+    .notes textarea:focus,
+    .btn:focus,
+    .chapter__header:focus-visible,
+    .info-btn:focus,
+    .task__checkbox:focus {
+      outline: 3px solid rgba(79,70,229,.18);
+      outline-offset: 2px;
+    }
+
+    .app-footer {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.45);
+      display: none;
+      align-items: end;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.is-open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(100%, 720px);
+      max-height: 82dvh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal__eyebrow {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+
+    .modal h2 {
+      margin: 12px 0 8px;
+      font-size: 22px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .modal p {
+      margin: 0 0 14px;
+      color: #334155;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .modal__actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    @media (min-width: 768px) {
+      .app-shell {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+
+      .hero {
+        padding: 30px 24px 24px;
+      }
+
+      .hero__stats {
+        grid-template-columns: 1.2fr .8fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div class="hero__badge">📘 Tracker editorial</div>
+      <h1>TESIS DISEÑO EDITORIAL</h1>
+      <p class="hero__text">Seguimiento claro del avance editorial por capítulo, con progreso automático y guardado local.</p>
+
+      <section class="hero__stats" aria-label="Resumen de avance">
+        <article class="stat-card stat-card--progress">
+          <div class="stat-card__top">
+            <span class="stat-card__label">Progreso total</span>
+            <strong class="stat-card__value" id="progressPercent">0%</strong>
+          </div>
+          <div class="progress-bar" aria-hidden="true">
+            <span id="progressFill"></span>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-card__label">Capítulos completados</span>
+          <strong class="stat-card__value" id="chaptersDone">0 / 0</strong>
+          <span class="stat-card__meta" id="stepsDone">0 de 0 pasos listos</span>
+        </article>
+      </section>
+    </header>
+
+    <section class="toolbar" aria-label="Acciones generales">
+      <p class="toolbar__hint">Cada capítulo cambia a completado cuando todos sus pasos están listos. Todo se guarda en este dispositivo con LocalStorage.</p>
+      <div class="toolbar__actions">
+        <button class="btn btn--ghost" id="toggleAllBtn" type="button">Contraer todo</button>
+        <button class="btn btn--accent" id="resetBtn" type="button">Resetear progreso</button>
+      </div>
+    </section>
+
+    <section class="chapters" id="chaptersContainer" aria-label="Capítulos del tracker"></section>
+
+    <footer class="app-footer">
+      <p>Versión lista para GitHub Pages y uso como web app en iPhone.</p>
+    </footer>
+  </main>
+
+  <div class="modal-backdrop" id="infoModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
+      <span class="modal__eyebrow">Info de fase</span>
+      <h2 id="infoModalTitle">Herramienta IA</h2>
+      <p id="infoModalText"></p>
+      <div class="modal__actions">
+        <button class="btn btn--ghost" id="copyInfoBtn" type="button">Copiar texto</button>
+        <button class="btn btn--accent" id="closeInfoBtn" type="button">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'tesis-diseno-editorial-v2';
+
+    const phaseInfo = {
+      phase2: {
+        ai: 'Notebook LM',
+        text: 'Fase 2 usa Notebook LM. Esta fase sirve para revisar, leer o consultar material base de forma más analítica antes de pasar a ajustes posteriores.'
+      },
+      phase3: {
+        ai: 'GPT',
+        text: 'Fase 3 usa GPT. Esta fase sirve para reinterpretar, estructurar o transformar el contenido según el objetivo editorial del capítulo.'
+      },
+      phase4: {
+        ai: 'GPT',
+        text: 'Fase 4 usa GPT. Aquí puedes apoyarte en GPT para refinar, revisar o ajustar el contenido en función de claridad y coherencia.'
+      },
+      phase6: {
+        ai: 'GPT',
+        text: 'Fase 6 usa GPT. Esta fase puede ayudarte a pulir entregables, detectar inconsistencias y acelerar el cierre de cada capítulo.'
+      }
+    };
+
+    const chaptersSeed = [
+      { id: 'c02', emoji: '🪶', title: '02. Introducción' },
+      { id: 'c03', emoji: '🧭', title: '03. Elección y delimitación del tema' },
+      { id: 'c04', emoji: '🔎', title: '04. Planteamiento del problema' },
+      { id: 'c05', emoji: '💡', title: '05. Justificación' },
+      { id: 'c06', emoji: '🎯', title: '06. Objetivos' },
+      { id: 'c07', emoji: '🧪', title: '07. Hipótesis' },
+      { id: 'c08', emoji: '🧰', title: '08. Metodología de investigación y diseño' },
+      { id: 'c09', emoji: '📚', title: '09. Marco de referencia' },
+      { id: 'c10', emoji: '⚖️', title: '10. Normatividad' },
+      { id: 'c11', emoji: '🧠', title: '11. Principios UX/UI y claridad espacial' },
+      { id: 'c12', emoji: '🏛️', title: '12. Estudio de casos análogos' },
+      { id: 'c13', emoji: '🧾', title: '13. Conclusiones de la Sección I: Investigación' },
+      { id: 'c14', emoji: '🏗️', title: '14. Introducción al proyecto' },
+      { id: 'c15', emoji: '📍', title: '15. Características generales del predio' },
+      { id: 'c16', emoji: '📐', title: '16. Criterios de diseño arquitectónico' },
+      { id: 'c17', emoji: '🌿', title: '17. Justificación espacial y sensorial del programa arquitectónico' },
+      { id: 'c18', emoji: '✨', title: '18. Desarrollo conceptual' },
+      { id: 'c19', emoji: '🗺️', title: '19. Descripción arquitectónica por zonas' },
+      { id: 'c20', emoji: '🏁', title: '20. Conclusiones sección II: Proyecto arquitectónico' }
+    ].map(chapter => ({
+      ...chapter,
+      tasks: [
+        { id: `${chapter.id}-phase1`, label: 'Fase 1' },
+        { id: `${chapter.id}-phase2`, label: 'Fase 2', infoKey: 'phase2' },
+        { id: `${chapter.id}-phase3`, label: 'Fase 3', infoKey: 'phase3' },
+        { id: `${chapter.id}-phase4`, label: 'Fase 4', infoKey: 'phase4' },
+        { id: `${chapter.id}-phase5`, label: 'Fase 5' },
+        { id: `${chapter.id}-phase6`, label: 'Fase 6', infoKey: 'phase6' },
+        { id: `${chapter.id}-phase7`, label: 'Fase 7' }
+      ]
+    }));
+
+    const state = loadState();
+
+    const chaptersContainer = document.getElementById('chaptersContainer');
+    const progressPercent = document.getElementById('progressPercent');
+    const chaptersDone = document.getElementById('chaptersDone');
+    const stepsDone = document.getElementById('stepsDone');
+    const progressFill = document.getElementById('progressFill');
+    const resetBtn = document.getElementById('resetBtn');
+    const toggleAllBtn = document.getElementById('toggleAllBtn');
+
+    const infoModal = document.getElementById('infoModal');
+    const infoModalTitle = document.getElementById('infoModalTitle');
+    const infoModalText = document.getElementById('infoModalText');
+    const closeInfoBtn = document.getElementById('closeInfoBtn');
+    const copyInfoBtn = document.getElementById('copyInfoBtn');
+
+    function createInitialState() {
+      const openChapters = {};
+      const completed = {};
+      const notes = {};
+
+      chaptersSeed.forEach((chapter, index) => {
+        openChapters[chapter.id] = index === 0;
+        notes[chapter.id] = '';
+        chapter.tasks.forEach(task => {
+          completed[task.id] = false;
+        });
+      });
+
+      return { openChapters, completed, notes };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createInitialState();
+        const parsed = JSON.parse(raw);
+        return mergeState(parsed);
+      } catch {
+        return createInitialState();
+      }
+    }
+
+    function mergeState(parsed) {
+      const base = createInitialState();
+      return {
+        openChapters: { ...base.openChapters, ...(parsed.openChapters || {}) },
+        completed: { ...base.completed, ...(parsed.completed || {}) },
+        notes: { ...base.notes, ...(parsed.notes || {}) }
+      };
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function getStats() {
+      let totalTasks = 0;
+      let doneTasks = 0;
+      let doneChapters = 0;
+
+      chaptersSeed.forEach(chapter => {
+        const totalInChapter = chapter.tasks.length;
+        const doneInChapter = chapter.tasks.filter(task => state.completed[task.id]).length;
+        totalTasks += totalInChapter;
+        doneTasks += doneInChapter;
+        if (doneInChapter === totalInChapter) doneChapters += 1;
+      });
+
+      const percent = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
+      return { totalTasks, doneTasks, doneChapters, totalChapters: chaptersSeed.length, percent };
+    }
+
+    function render() {
+      const stats = getStats();
+      progressPercent.textContent = `${stats.percent}%`;
+      chaptersDone.textContent = `${stats.doneChapters} / ${stats.totalChapters}`;
+      stepsDone.textContent = `${stats.doneTasks} de ${stats.totalTasks} pasos listos`;
+      progressFill.style.width = `${stats.percent}%`;
+
+      chaptersContainer.innerHTML = '';
+
+      chaptersSeed.forEach(chapter => {
+        const doneCount = chapter.tasks.filter(task => state.completed[task.id]).length;
+        const totalCount = chapter.tasks.length;
+        const isComplete = doneCount === totalCount;
+        const isOpen = !!state.openChapters[chapter.id];
+
+        const article = document.createElement('article');
+        article.className = `chapter ${isComplete ? 'is-complete' : ''} ${isOpen ? 'is-open' : ''}`;
+
+        article.innerHTML = `
+          <button class="chapter__header" type="button" aria-expanded="${isOpen}" data-chapter-toggle="${chapter.id}">
+            <span class="chapter__status">✓</span>
+            <span class="chapter__emoji">${chapter.emoji}</span>
+            <span>
+              <h2 class="chapter__title">${chapter.title}</h2>
+              <div class="chapter__meta">${doneCount}/${totalCount} pasos completados</div>
+            </span>
+            <span class="status-pill ${isComplete ? 'status-pill--complete' : 'status-pill--pending'}">${isComplete ? 'Completado' : 'Pendiente'}</span>
+            <span class="chapter__chevron">⌄</span>
+          </button>
+          <div class="chapter__body">
+            <div class="tasks">
+              ${chapter.tasks.map(task => {
+                const checked = !!state.completed[task.id];
+                const info = task.infoKey ? phaseInfo[task.infoKey] : null;
+                return `
+                  <div class="task ${checked ? 'is-done' : ''}">
+                    <input class="task__checkbox" type="checkbox" ${checked ? 'checked' : ''} data-task-id="${task.id}" aria-label="Marcar ${task.label}">
+                    <div>
+                      <span class="task__label">${task.label}</span>
+                      <div class="task__meta">
+                        ${info ? `<span class="ai-chip">${info.ai}</span>` : ''}
+                      </div>
+                    </div>
+                    ${info ? `<button class="info-btn" type="button" data-info-key="${task.infoKey}" aria-label="Ver info">i</button>` : '<span></span>'}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <div class="notes">
+              <label for="notes-${chapter.id}">Notas del capítulo</label>
+              <textarea id="notes-${chapter.id}" data-notes-id="${chapter.id}" placeholder="Ideas, pendientes o recordatorios...">${escapeHtml(state.notes[chapter.id] || '')}</textarea>
+            </div>
+          </div>
+        `;
+
+        chaptersContainer.appendChild(article);
+      });
+
+      bindEvents();
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('[data-chapter-toggle]').forEach(button => {
+        button.addEventListener('click', () => {
+          const id = button.dataset.chapterToggle;
+          state.openChapters[id] = !state.openChapters[id];
+          saveState();
+          render();
+        });
+      });
+
+      document.querySelectorAll('[data-task-id]').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          const id = checkbox.dataset.taskId;
+          state.completed[id] = checkbox.checked;
+          saveState();
+          render();
+        });
+      });
+
+      document.querySelectorAll('[data-notes-id]').forEach(textarea => {
+        textarea.addEventListener('input', () => {
+          state.notes[textarea.dataset.notesId] = textarea.value;
+          saveState();
+        });
+      });
+
+      document.querySelectorAll('[data-info-key]').forEach(button => {
+        button.addEventListener('click', event => {
+          event.stopPropagation();
+          const key = button.dataset.infoKey;
+          const info = phaseInfo[key];
+          if (!info) return;
+          openModal(`${info.ai} · ${button.closest('.task').querySelector('.task__label').textContent}`, info.text);
+        });
+      });
+    }
+
+    function openModal(title, text) {
+      infoModalTitle.textContent = title;
+      infoModalText.textContent = text;
+      infoModal.classList.add('is-open');
+      infoModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+      infoModal.classList.remove('is-open');
+      infoModal.setAttribute('aria-hidden', 'true');
+    }
+
+    closeInfoBtn.addEventListener('click', closeModal);
+
+    copyInfoBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(infoModalText.textContent);
+        copyInfoBtn.textContent = 'Copiado';
+        setTimeout(() => {
+          copyInfoBtn.textContent = 'Copiar texto';
+        }, 1200);
+      } catch {
+        copyInfoBtn.textContent = 'No se pudo copiar';
+        setTimeout(() => {
+          copyInfoBtn.textContent = 'Copiar texto';
+        }, 1200);
+      }
+    });
+
+    infoModal.addEventListener('click', event => {
+      if (event.target === infoModal) closeModal();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      const confirmed = window.confirm('Esto borrará checks, notas y capítulos abiertos. ¿Quieres continuar?');
+      if (!confirmed) return;
+
+      localStorage.removeItem(STORAGE_KEY);
+      const fresh = createInitialState();
+      state.openChapters = fresh.openChapters;
+      state.completed = fresh.completed;
+      state.notes = fresh.notes;
+      saveState();
+      render();
+    });
+
+    toggleAllBtn.addEventListener('click', () => {
+      const shouldClose = Object.values(state.openChapters).some(Boolean);
+      chaptersSeed.forEach(chapter => {
+        state.openChapters[chapter.id] = !shouldClose;
+      });
+      toggleAllBtn.textContent = shouldClose ? 'Expandir todo' : 'Contraer todo';
+      saveState();
+      render();
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    render();
+  </script>
+</body>
+</html>

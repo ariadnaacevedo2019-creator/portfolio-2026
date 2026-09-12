@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>¿Qué toca hoy?</title>
+
+  <!-- Tailwind CSS desde CDN (requisito) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Ajustes mínimos para una vibra calmada */
+    :root { color-scheme: light; }
+    .screen { min-height: 100dvh; }
+    .card { border-radius: 1rem; }
+    .btn-big { border-radius: 1.25rem; }
+    .tap { -webkit-tap-highlight-color: transparent; }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 tap">
+  <div id="app" class="screen"></div>
+
+  <script>
+    /********************************************************************
+     * ¿Qué toca hoy? — App 100% cliente con LocalStorage
+     * - Recurrente: categorías + actividades
+     * - Checklist de hoy: exclusiones temporales (no borran lo recurrente)
+     * - Checklist guardada: UNA sola; incluye estado de completado por actividad
+     ********************************************************************/
+
+    /***********************
+     * LocalStorage Keys
+     ***********************/
+    const LS = {
+      RECURRENT: "qt_recurrent_v1",
+      TODAY_DRAFT: "qt_today_draft_v1",
+      SAVED: "qt_saved_checklist_v1",
+    };
+
+    /***********************
+     * Utilidades
+     ***********************/
+    const uid = () => crypto.randomUUID ? crypto.randomUUID() : ("id_" + Math.random().toString(16).slice(2));
+    const nowISODate = () => new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    function loadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
+    function saveJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    /***********************
+     * Datos por defecto (suaves, editables)
+     ***********************/
+    function seedIfEmpty() {
+      const existing = loadJSON(LS.RECURRENT, null);
+      if (existing) return;
+
+      const data = {
+        categories: [
+          {
+            id: uid(),
+            icon: "🏠",
+            name: "Casa",
+            activities: [
+              { id: uid(), text: "Ventilar 5 min" },
+              { id: uid(), text: "Limpieza rápida 10 min" },
+            ],
+          },
+          {
+            id: uid(),
+            icon: "🐾",
+            name: "Mascotas",
+            activities: [
+              { id: uid(), text: "Agua fresca" },
+              { id: uid(), text: "Paseo / salida" },
+            ],
+          },
+          {
+            id: uid(),
+            icon: "🍳",
+            name: "Cocina",
+            activities: [
+              { id: uid(), text: "Revisar comida disponible" },
+              { id: uid(), text: "Lavar 3 cosas (mini)" },
+            ],
+          },
+        ],
+      };
+
+      saveJSON(LS.RECURRENT, data);
+
+      // Borradores/guardados limpios
+      saveJSON(LS.TODAY_DRAFT, { date: nowISODate(), excludedCategories: [], excludedActivities: {} });
+      localStorage.removeItem(LS.SAVED);
+    }
+
+    /***********************
+     * Estado global (simple)
+     ***********************/
+    const state = {
+      route: "home", // home | recurrent | today | saved
+    };
+
+    function getRouteFromHash() {
+      const h = (location.hash || "#/home").replace("#/", "");
+      if (["home", "recurrent", "today", "saved"].includes(h)) return h;
+      return "home";
+    }
+
+    function navigate(route) {
+      location.hash = "#/" + route;
+    }
+
+    /***********************
+     * Selectores de datos
+     ***********************/
+    function getRecurrent() {
+      return loadJSON(LS.RECURRENT, { categories: [] });
+    }
+
+    function setRecurrent(next) {
+      saveJSON(LS.RECURRENT, next);
+    }
+
+    function getTodayDraft() {
+      const draft = loadJSON(LS.TODAY_DRAFT, null);
+      const today = nowISODate();
+
+      // Si no existe o es de otro día, se reinicia automáticamente (sin drama).
+      if (!draft || draft.date !== today) {
+        const fresh = { date: today, excludedCategories: [], excludedActivities: {} };
+        saveJSON(LS.TODAY_DRAFT, fresh);
+        return fresh;
+      }
+      return draft;
+    }
+
+    function setTodayDraft(next) {
+      saveJSON(LS.TODAY_DRAFT, next);
+    }
+
+    function getSavedChecklist() {
+      return loadJSON(LS.SAVED, null);
+    }
+
+    function setSavedChecklist(next) {
+      saveJSON(LS.SAVED, next);
+    }
+
+    /***********************
+     * Construir checklist de hoy (snapshot desde recurrente - exclusiones)
+     ***********************/
+    function buildTodayFromRecurrent() {
+      const rec = getRecurrent();
+      const draft = getTodayDraft();
+
+      const excludedCatSet = new Set(draft.excludedCategories || []);
+      const excludedActivities = draft.excludedActivities || {};
+
+      const categories = rec.categories
+        .filter(c => !excludedCatSet.has(c.id))
+        .map(c => {
+          const exActs = new Set((excludedActivities[c.id] || []));
+          const activities = (c.activities || []).filter(a => !exActs.has(a.id));
+          return { ...c, activities };
+        })
+        // Si una categoría se queda sin actividades, aún la mostramos (para que se note),
+        // pero en guardado no conviene guardarla vacía: se filtrará al guardar.
+        ;
+
+      return categories;
+    }
+
+    /***********************
+     * Guardar UNA checklist (reemplaza la anterior)
+     ***********************/
+    function saveSingleChecklistFromToday() {
+      const categories = buildTodayFromRecurrent()
+        .map(c => ({
+          id: c.id,
+          icon: c.icon,
+          name: c.name,
+          activities: (c.activities || []).map(a => ({ id: a.id, text: a.text })),
+        }))
+        // No guardar categorías vacías
+        .filter(c => (c.activities || []).length > 0);
+
+      // Estados de completado por actividad
+      const completed = {}; // { [activityId]: true/false }
+      for (const c of categories) {
+        for (const a of c.activities) completed[a.id] = false;
+      }
+
+      const payload = {
+        savedAt: new Date().toISOString(),
+        categories,
+        completed,
+      };
+
+      setSavedChecklist(payload);
+      navigate("saved");
+    }
+
+    /***********************
+     * UI Helpers
+     ***********************/
+    function el(html) {
+      const t = document.createElement("template");
+      t.innerHTML = html.trim();
+      return t.content.firstElementChild;
+    }
+
+    function screenShell({ title, subtitle, theme, content, footer }) {
+      // theme: home|recurrent|today|saved
+      const themes = {
+        home: {
+          bg: "bg-slate-50",
+          bar: "bg-white/80 border-slate-200",
+          accent: "text-violet-700",
+          chip: "bg-violet-50 text-violet-700 border-violet-200",
+        },
+        recurrent: {
+          bg: "bg-sky-50",
+          bar: "bg-white/80 border-sky-200",
+          accent: "text-sky-700",
+          chip: "bg-sky-50 text-sky-700 border-sky-200",
+        },
+        today: {
+          bg: "bg-emerald-50",
+          bar: "bg-white/80 border-emerald-200",
+          accent: "text-emerald-700",
+          chip: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        },
+        saved: {
+          bg: "bg-amber-50",
+          bar: "bg-white/80 border-amber-200",
+          accent: "text-amber-800",
+          chip: "bg-amber-50 text-amber-800 border-amber-200",
+        },
+      };
+      const th = themes[theme] || themes.home;
+
+      const root = el(`
+        <div class="${th.bg} screen">
+          <div class="sticky top-0 z-10 backdrop-blur border-b ${th.bar}">
+            <div class="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
+              ${theme === "home" ? "" : `<button data-back class="shrink-0 rounded-xl border px-3 py-2 text-sm bg-white hover:bg-slate-50 active:scale-[0.99]">←</button>`}
+              <div class="min-w-0">
+                <h1 class="text-xl font-semibold tracking-tight ${th.accent}">${title}</h1>
+                ${subtitle ? `<p class="text-sm text-slate-600 mt-0.5">${subtitle}</p>` : ""}
+              </div>
+              <div class="ml-auto">
+                <span class="inline-flex items-center gap-2 text-xs px-3 py-1 border rounded-full ${th.chip}">
+                  <span class="h-2 w-2 rounded-full bg-current opacity-60"></span>
+                  ${theme === "home" ? "Bienvenido" :
+                    theme === "recurrent" ? "Recurrente" :
+                    theme === "today" ? "Hoy" : "Guardada"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <main class="max-w-2xl mx-auto px-4 py-6 space-y-4">
+            ${content}
+          </main>
+
+          ${footer ? `<footer class="max-w-2xl mx-auto px-4 pb-8 pt-2">${footer}</footer>` : `<div class="h-6"></div>`}
+        </div>
+      `);
+
+      // Back: vuelve a Home por simplicidad cognitiva (en vez de historial largo)
+      const backBtn = root.querySelector("[data-back]");
+      if (backBtn) backBtn.addEventListener("click", () => navigate("home"));
+      return root;
+    }
+
+    function emptyStateCard(message, themeAccent = "text-slate-700") {
+      return `
+        <div class="card border bg-white p-5">
+          <p class="text-sm ${themeAccent}">${message}</p>
+        </div>
+      `;
+    }
+
+    /***********************
+     * Pantalla Home
+     ***********************/
+    function renderHome() {
+      const content = `
+        <div class="card border bg-white p-6">
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-900">¿Qué toca hoy?</h2>
+          <p class="text-sm text-slate-600 mt-2">
+            Checklist diaria con enfoque visual, simple y calmado.
+          </p>
+        </div>
+
+        <div class="grid gap-3">
+          <button data-go="saved"
+            class="btn-big w-full text-left border bg-white p-5 hover:bg-slate-50 active:scale-[0.99]">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-xl">✅</div>
+              <div>
+                <div class="text-lg font-semibold text-slate-900">Checklist guardada</div>
+                <div class="text-sm text-slate-600">Ver y marcar actividades</div>
+              </div>
+            </div>
+          </button>
+
+          <button data-go="today"
+            class="btn-big w-full text-left border bg-white p-5 hover:bg-slate-50 active:scale-[0.99]">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-xl">🟩</div>
+              <div>
+                <div class="text-lg font-semibold text-slate-900">Checklist de hoy</div>
+                <div class="text-sm text-slate-600">Elegir qué entra hoy</div>
+              </div>
+            </div>
+          </button>
+
+          <button data-go="recurrent"
+            class="btn-big w-full text-left border bg-white p-5 hover:bg-slate-50 active:scale-[0.99]">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-xl">🔁</div>
+              <div>
+                <div class="text-lg font-semibold text-slate-900">Actividades recurrentes</div>
+                <div class="text-sm text-slate-600">Editar categorías y actividades</div>
+              </div>
+            </div>
+          </button>
+        </div>
+      `;
+
+      const root = screenShell({
+        title: "Bienvenido",
+        subtitle: "Elige una pantalla",
+        theme: "home",
+        content,
+        footer: `
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>Todo se guarda en este dispositivo (LocalStorage).</span>
+            <button data-reset class="underline hover:text-slate-700">Restablecer datos</button>
+          </div>
+        `,
+      });
+
+      root.querySelectorAll("[data-go]").forEach(btn => {
+        btn.addEventListener("click", () => navigate(btn.getAttribute("data-go")));
+      });
+
+      root.querySelector("[data-reset]").addEventListener("click", () => {
+        // Reset suave: confirmación mínima sin mensajes motivacionales
+        const ok = confirm("Esto borrará categorías, actividades y checklist guardada. ¿Continuar?");
+        if (!ok) return;
+        localStorage.removeItem(LS.RECURRENT);
+        localStorage.removeItem(LS.TODAY_DRAFT);
+        localStorage.removeItem(LS.SAVED);
+        seedIfEmpty();
+        render();
+      });
+
+      return root;
+    }
+
+    /***********************
+     * Pantalla Actividades recurrentes
+     ***********************/
+    function renderRecurrent() {
+      const rec = getRecurrent();
+      const categories = rec.categories || [];
+
+      let content = "";
+
+      if (categories.length === 0) {
+        content += emptyStateCard("No hay categorías todavía. Crea una categoría para empezar.", "text-sky-800");
+      }
+
+      content += categories.map(cat => {
+        const acts = cat.activities || [];
+        const items = acts.length
+          ? acts.map(a => `
+              <li class="flex items-center justify-between gap-3 py-2">
+                <span class="text-sm text-slate-800">• ${escapeHTML(a.text)}</span>
+                <button data-del-activity="${cat.id}::${a.id}"
+                  class="shrink-0 rounded-xl border px-3 py-1.5 text-sm bg-white hover:bg-slate-50">
+                  –
+                </button>
+              </li>
+            `).join("")
+          : `<li class="py-2 text-sm text-slate-500">Sin actividades</li>`;
+
+        return `
+          <section class="card border bg-white p-5" data-cat="${cat.id}">
+            <div class="flex items-start gap-3">
+              <div class="h-12 w-12 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-2xl" data-icon>
+                ${escapeHTML(cat.icon || "📌")}
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-semibold text-slate-900 truncate" data-name>${escapeHTML(cat.name || "Categoría")}</h3>
+                  <button data-edit-cat="${cat.id}"
+                    class="rounded-xl border px-2.5 py-1.5 text-sm bg-white hover:bg-slate-50"
+                    title="Editar nombre e ícono">
+                    ✏️
+                  </button>
+                </div>
+                <ul class="mt-3 divide-y">
+                  ${items}
+                </ul>
+
+                <div class="mt-4 flex gap-2">
+                  <button data-add-activity="${cat.id}"
+                    class="rounded-2xl border px-4 py-2 text-sm bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100">
+                    + Agregar actividad
+                  </button>
+
+                  <button data-del-cat="${cat.id}"
+                    class="rounded-2xl border px-4 py-2 text-sm bg-white hover:bg-slate-50">
+                    Eliminar categoría
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+      }).join("");
+
+      const root = screenShell({
+        title: "Actividades recurrentes",
+        subtitle: "Crea y ajusta tu base (se guarda automáticamente)",
+        theme: "recurrent",
+        content: content + `
+          <div class="pt-2">
+            <button data-new-cat
+              class="w-full rounded-2xl border px-5 py-4 text-left bg-sky-600 text-white hover:bg-sky-700 active:scale-[0.99]">
+              <div class="text-base font-semibold">Nueva categoría</div>
+              <div class="text-sm opacity-90">Agregar una sección con ícono</div>
+            </button>
+          </div>
+        `,
+      });
+
+      // Handlers
+      root.querySelectorAll("[data-add-activity]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const catId = btn.getAttribute("data-add-activity");
+          const text = prompt("Nueva actividad (texto corto):");
+          if (!text) return;
+
+          const next = getRecurrent();
+          const cat = next.categories.find(c => c.id === catId);
+          if (!cat) return;
+          cat.activities = cat.activities || [];
+          cat.activities.push({ id: uid(), text: text.trim() });
+          setRecurrent(next);
+          render();
+        });
+      });
+
+      root.querySelectorAll("[data-del-activity]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const [catId, actId] = btn.getAttribute("data-del-activity").split("::");
+          const next = getRecurrent();
+          const cat = next.categories.find(c => c.id === catId);
+          if (!cat) return;
+          cat.activities = (cat.activities || []).filter(a => a.id !== actId);
+          setRecurrent(next);
+          render();
+        });
+      });
+
+      root.querySelectorAll("[data-del-cat]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const catId = btn.getAttribute("data-del-cat");
+          const ok = confirm("¿Eliminar esta categoría y sus actividades?");
+          if (!ok) return;
+          const next = getRecurrent();
+          next.categories = (next.categories || []).filter(c => c.id !== catId);
+          setRecurrent(next);
+
+          // Limpieza: si estaba excluida o en draft, quitar referencias
+          const draft = getTodayDraft();
+          draft.excludedCategories = (draft.excludedCategories || []).filter(id => id !== catId);
+          delete (draft.excludedActivities || {})[catId];
+          setTodayDraft(draft);
+
+          render();
+        });
+      });
+
+      root.querySelectorAll("[data-edit-cat]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const catId = btn.getAttribute("data-edit-cat");
+          const next = getRecurrent();
+          const cat = next.categories.find(c => c.id === catId);
+          if (!cat) return;
+
+          const name = prompt("Nombre de la categoría:", cat.name || "");
+          if (name === null) return; // cancel
+          const icon = prompt("Sticker / ícono (emoji):", cat.icon || "📌");
+          if (icon === null) return;
+
+          cat.name = name.trim() || "Categoría";
+          cat.icon = (icon.trim() || "📌").slice(0, 3);
+          setRecurrent(next);
+          render();
+        });
+      });
+
+      root.querySelector("[data-new-cat]").addEventListener("click", () => {
+        const name = prompt("Nombre de la nueva categoría:");
+        if (!name) return;
+        const icon = prompt("Sticker / ícono (emoji):", "📌");
+        if (icon === null) return;
+
+        const next = getRecurrent();
+        next.categories = next.categories || [];
+        next.categories.push({
+          id: uid(),
+          name: name.trim() || "Categoría",
+          icon: (icon.trim() || "📌").slice(0, 3),
+          activities: [],
+        });
+        setRecurrent(next);
+        render();
+      });
+
+      return root;
+    }
+
+    /***********************
+     * Pantalla Checklist de hoy (excluir sin borrar recurrente)
+     ***********************/
+    function renderToday() {
+      const draft = getTodayDraft();
+      const cats = buildTodayFromRecurrent();
+      const rec = getRecurrent();
+
+      // Para mostrar también categorías excluidas (opcional visual): aquí solo mostramos las incluidas (más limpio)
+      let content = `
+        <div class="card border bg-white p-5">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h2 class="font-semibold text-slate-900">Selección de hoy</h2>
+              <p class="text-sm text-slate-600">Quita lo que no entra hoy. No se borra lo recurrente.</p>
+            </div>
+            <span class="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+              ${draft.date}
+            </span>
+          </div>
+        </div>
+      `;
+
+      if ((rec.categories || []).length === 0) {
+        content += emptyStateCard("No hay actividades recurrentes. Ve a “Actividades recurrentes” para crear tu base.", "text-emerald-800");
+      } else if (cats.length === 0) {
+        content += emptyStateCard("Hoy no quedó nada en la checklist. Puedes volver y re-incluir desde tus recurrentes.", "text-emerald-800");
+      }
+
+      content += cats.map(cat => {
+        const acts = cat.activities || [];
+        return `
+          <section class="card border bg-white p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl">
+                  ${escapeHTML(cat.icon || "📌")}
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-slate-900 truncate">${escapeHTML(cat.name || "Categoría")}</h3>
+                  <p class="text-xs text-slate-500">Quitar categoría o actividades</p>
+                </div>
+              </div>
+
+              <button data-exclude-cat="${cat.id}"
+                class="shrink-0 rounded-xl border px-3 py-2 text-sm bg-white hover:bg-slate-50"
+                title="Excluir categoría del día">
+                –
+              </button>
+            </div>
+
+            <ul class="mt-4 divide-y">
+              ${acts.length ? acts.map(a => `
+                <li class="flex items-center justify-between gap-3 py-2">
+                  <span class="text-sm text-slate-800">${escapeHTML(a.text)}</span>
+                  <button data-exclude-act="${cat.id}::${a.id}"
+                    class="shrink-0 rounded-xl border px-3 py-1.5 text-sm bg-white hover:bg-slate-50"
+                    title="Excluir actividad del día">
+                    –
+                  </button>
+                </li>
+              `).join("") : `
+                <li class="py-2 text-sm text-slate-500">Sin actividades (excluiste todas)</li>
+              `}
+            </ul>
+          </section>
+        `;
+      }).join("");
+
+      const footer = `
+        <button data-save
+          class="w-full rounded-2xl px-5 py-4 text-left bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]">
+          <div class="text-base font-semibold">Guardar</div>
+          <div class="text-sm opacity-90">Guardar esta checklist (reemplaza la anterior)</div>
+        </button>
+
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <button data-reset-today
+            class="rounded-2xl border px-4 py-3 text-sm bg-white hover:bg-slate-50">
+            Revertir exclusiones (hoy)
+          </button>
+          <button data-go-recurrent
+            class="rounded-2xl border px-4 py-3 text-sm bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100">
+            Editar recurrente
+          </button>
+        </div>
+      `;
+
+      const root = screenShell({
+        title: "Checklist de hoy",
+        subtitle: "Define lo que sí entra hoy",
+        theme: "today",
+        content,
+        footer,
+      });
+
+      root.querySelectorAll("[data-exclude-cat]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const catId = btn.getAttribute("data-exclude-cat");
+          const d = getTodayDraft();
+          d.excludedCategories = Array.from(new Set([...(d.excludedCategories || []), catId]));
+          setTodayDraft(d);
+          render();
+        });
+      });
+
+      root.querySelectorAll("[data-exclude-act]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const [catId, actId] = btn.getAttribute("data-exclude-act").split("::");
+          const d = getTodayDraft();
+          d.excludedActivities = d.excludedActivities || {};
+          d.excludedActivities[catId] = Array.from(new Set([...(d.excludedActivities[catId] || []), actId]));
+          setTodayDraft(d);
+          render();
+        });
+      });
+
+      root.querySelector("[data-save]").addEventListener("click", () => {
+        saveSingleChecklistFromToday();
+      });
+
+      root.querySelector("[data-reset-today]").addEventListener("click", () => {
+        const fresh = { date: nowISODate(), excludedCategories: [], excludedActivities: {} };
+        setTodayDraft(fresh);
+        render();
+      });
+
+      root.querySelector("[data-go-recurrent]").addEventListener("click", () => {
+        navigate("recurrent");
+      });
+
+      return root;
+    }
+
+    /***********************
+     * Pantalla Checklist guardada
+     ***********************/
+    function renderSaved() {
+      const saved = getSavedChecklist();
+
+      let content = "";
+      if (!saved || !saved.categories || saved.categories.length === 0) {
+        content += emptyStateCard("No hay checklist guardada. Ve a “Checklist de hoy” y presiona Guardar.", "text-amber-900");
+      } else {
+        content += `
+          <div class="card border bg-white p-5">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h2 class="font-semibold text-slate-900">Checklist guardada</h2>
+                <p class="text-sm text-slate-600">Marca actividades con un check. Sin métricas.</p>
+              </div>
+              <span class="text-xs text-amber-900 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
+                ${new Date(saved.savedAt).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })}
+              </span>
+            </div>
+          </div>
+        `;
+
+        const completed = saved.completed || {};
+
+        content += saved.categories.map(cat => {
+          const acts = cat.activities || [];
+          const allDone = acts.length > 0 && acts.every(a => !!completed[a.id]);
+
+          return `
+            <section class="card border bg-white p-5">
+              <div class="flex items-start gap-3">
+                <div class="h-12 w-12 rounded-2xl border flex items-center justify-center text-2xl
+                  ${allDone ? "bg-amber-200 border-amber-300" : "bg-amber-50 border-amber-200"}"
+                  title="${allDone ? "Categoría completa" : "Categoría pendiente"}">
+                  ${escapeHTML(cat.icon || "📌")}
+                </div>
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-slate-900 truncate">${escapeHTML(cat.name || "Categoría")}</h3>
+                  <p class="text-xs text-slate-500">${allDone ? "Completa" : "Pendiente"}</p>
+                </div>
+              </div>
+
+              <ul class="mt-4 space-y-2">
+                ${acts.map(a => {
+                  const isDone = !!completed[a.id];
+                  return `
+                    <li class="flex items-center justify-between gap-3 p-3 rounded-2xl border
+                      ${isDone ? "bg-slate-50" : "bg-white"}">
+                      <div class="flex items-center gap-3 min-w-0">
+                        <button data-toggle="${a.id}"
+                          class="h-8 w-8 rounded-xl border flex items-center justify-center text-lg
+                            ${isDone ? "bg-slate-200 border-slate-300" : "bg-white border-slate-300"}"
+                          aria-label="Marcar actividad">
+                          ${isDone ? "✓" : ""}
+                        </button>
+                        <span class="text-sm truncate ${isDone ? "text-slate-500" : "text-slate-900"}">
+                          ${escapeHTML(a.text)}
+                        </span>
+                      </div>
+                    </li>
+                  `;
+                }).join("")}
+              </ul>
+            </section>
+          `;
+        }).join("");
+      }
+
+      const footer = `
+        <button data-edit
+          class="w-full rounded-2xl px-5 py-4 text-left bg-amber-600 text-white hover:bg-amber-700 active:scale-[0.99]">
+          <div class="text-base font-semibold">Editar checklist</div>
+          <div class="text-sm opacity-90">Regresar a “Checklist de hoy”</div>
+        </button>
+
+        <div class="mt-3">
+          <button data-clear-saved
+            class="w-full rounded-2xl border px-4 py-3 text-sm bg-white hover:bg-slate-50">
+            Borrar checklist guardada
+          </button>
+        </div>
+      `;
+
+      const root = screenShell({
+        title: "Checklist guardada",
+        subtitle: "Estados visuales: pendiente / completada",
+        theme: "saved",
+        content,
+        footer,
+      });
+
+      // Toggle completado
+      root.querySelectorAll("[data-toggle]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const aId = btn.getAttribute("data-toggle");
+          const current = getSavedChecklist();
+          if (!current) return;
+
+          current.completed = current.completed || {};
+          current.completed[aId] = !current.completed[aId];
+          setSavedChecklist(current);
+          render(); // re-render para actualizar estilos + sticker completo
+        });
+      });
+
+      root.querySelector("[data-edit]").addEventListener("click", () => {
+        navigate("today");
+      });
+
+      root.querySelector("[data-clear-saved]").addEventListener("click", () => {
+        const ok = confirm("¿Borrar la checklist guardada?");
+        if (!ok) return;
+        localStorage.removeItem(LS.SAVED);
+        render();
+      });
+
+      return root;
+    }
+
+    /***********************
+     * Render principal
+     ***********************/
+    function render() {
+      state.route = getRouteFromHash();
+      const app = document.getElementById("app");
+      app.innerHTML = "";
+
+      const screen =
+        state.route === "home" ? renderHome() :
+        state.route === "recurrent" ? renderRecurrent() :
+        state.route === "today" ? renderToday() :
+        renderSaved();
+
+      app.appendChild(screen);
+    }
+
+    window.addEventListener("hashchange", render);
+
+    /***********************
+     * Seguridad básica: escape HTML (evita inyección si pegan texto raro)
+     ***********************/
+    function escapeHTML(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    /***********************
+     * Bienvenido
+     ***********************/
+    seedIfEmpty();
+    // Si abres el archivo sin hash, manda a home
+    if (!location.hash) location.hash = "#/home";
+    render();
+  </script>
+</body>
+</html>
