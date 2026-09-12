@@ -8,7 +8,7 @@ const projectData = {
     decision: "Priorizar comprensión sobre sofisticación visual: explicar el propósito de cada dato y revelar la complejidad paso a paso.",
     result: "+15% de leads calificados y −25% en el tiempo de prospección comercial documentados en el caso de estudio.",
     media: '<img src="assets/carbon-calculator.png" alt="Interfaz de resultados de la calculadora de huella de carbono">',
-    actions: '<a class="button button-primary" href="Caso_Estudio_Calculadora_Huella_De_Carbono.pdf" target="_blank">Ver caso en PDF ↗</a>'
+    actions: '<a class="button button-primary" href="https://ariadnaacevedo2019-creator.github.io/portfolio-2026/Caso_Estudio_Calculadora_Huella_De_Carbono.pdf" target="_blank">Ver caso en PDF ↗</a>'
   },
   today: {
     eyebrow: "Producto propio · UX + código · 2026",
