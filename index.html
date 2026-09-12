@@ -1,835 +1,307 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>¿Qué toca hoy?</title>
-
-  <!-- Tailwind CSS desde CDN (requisito) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    /* Ajustes mínimos para una vibra calmada */
-    :root { color-scheme: light; }
-    .screen { min-height: 100dvh; }
-    .card { border-radius: 1rem; }
-    .btn-big { border-radius: 1.25rem; }
-    .tap { -webkit-tap-highlight-color: transparent; }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Portafolio de Ariadna Anauf: UX, producto digital, IA aplicada y desarrollo frontend.">
+  <meta name="theme-color" content="#102A43">
+  <title>Ariadna Anauf — UX, IA y producto digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-<body class="bg-slate-50 text-slate-900 tap">
-  <div id="app" class="screen"></div>
+  <header class="site-header" id="inicio">
+    <a class="brand" href="#inicio" aria-label="Inicio — Ariadna Anauf">
+      <span class="brand-mark">AA</span>
+      <span>Ariadna Anauf</span>
+    </a>
+    <button class="menu-button" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menú">
+      <span></span><span></span>
+    </button>
+    <nav id="main-nav" aria-label="Navegación principal">
+      <a href="#proyectos">Proyectos</a>
+      <a href="#perfil">Perfil</a>
+      <a href="#cv">CV</a>
+      <a class="nav-cta" href="#contacto">Hablemos <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
 
-  <script>
-    /********************************************************************
-     * ¿Qué toca hoy? — App 100% cliente con LocalStorage
-     * - Recurrente: categorías + actividades
-     * - Checklist de hoy: exclusiones temporales (no borran lo recurrente)
-     * - Checklist guardada: UNA sola; incluye estado de completado por actividad
-     ********************************************************************/
+  <main id="contenido">
+    <section class="hero section-shell" aria-labelledby="hero-title">
+      <div class="hero-copy reveal">
+        <p class="eyebrow"><span class="status-dot"></span> UX · Producto · IA aplicada · Frontend</p>
+        <h1 id="hero-title">Convierto problemas complejos en <em>productos claros</em> que sí llegan a funcionar.</h1>
+        <p class="hero-lede">Investigo, diseño y construyo soluciones digitales. Mi fortaleza es conectar las necesidades de las personas con los objetivos del negocio y usar la IA para avanzar de la idea a un prototipo útil.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#proyectos">Ver proyectos <span aria-hidden="true">↓</span></a>
+          <a class="button button-secondary" href="assets/CV-Ariadna-Anauf-2026.pdf" download>Descargar CV <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="proof-row" aria-label="Resumen profesional">
+          <div><strong>4+</strong><span>años creando experiencias digitales</span></div>
+          <div><strong>3</strong><span>sectores: energía, educación y servicios</span></div>
+          <div><strong>C1</strong><span>inglés profesional</span></div>
+        </div>
+      </div>
 
-    /***********************
-     * LocalStorage Keys
-     ***********************/
-    const LS = {
-      RECURRENT: "qt_recurrent_v1",
-      TODAY_DRAFT: "qt_today_draft_v1",
-      SAVED: "qt_saved_checklist_v1",
-    };
+      <div class="hero-visual reveal" data-delay="1">
+        <div class="portrait-frame">
+          <img src="assets/ariadna-profile.png" alt="Retrato de Ariadna Anauf" width="800" height="800">
+          <span class="portrait-tag tag-one">Pienso en sistemas</span>
+          <span class="portrait-tag tag-two">Aprendo construyendo</span>
+        </div>
+        <div class="availability-card">
+          <span class="availability-icon" aria-hidden="true">✦</span>
+          <p><strong>Actualmente</strong> Analista de Experiencia Digital en Tuto Power</p>
+          <span>CDMX · 2026</span>
+        </div>
+      </div>
+    </section>
 
-    /***********************
-     * Utilidades
-     ***********************/
-    const uid = () => crypto.randomUUID ? crypto.randomUUID() : ("id_" + Math.random().toString(16).slice(2));
-    const nowISODate = () => new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    <section class="fit-strip" aria-label="Propuesta de valor">
+      <p>Entender <span>→</span> Diseñar <span>→</span> Prototipar <span>→</span> Validar <span>→</span> Implementar</p>
+    </section>
 
-    function loadJSON(key, fallback) {
-      try {
-        const raw = localStorage.getItem(key);
-        if (!raw) return fallback;
-        return JSON.parse(raw);
-      } catch {
-        return fallback;
-      }
-    }
-    function saveJSON(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
+    <section class="section-shell section-pad fit-section" id="perfil" aria-labelledby="fit-title">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Por qué yo / por qué Innavanti</p>
+        <h2 id="fit-title">La tecnología sirve cuando alguien entiende <em>para quién</em> y <em>para qué</em>.</h2>
+      </div>
+      <div class="fit-grid">
+        <blockquote class="quote-card reveal">
+          <p>“Le apuesto más a la persona que al conocimiento. Una persona se puede capacitar, pero cómo es, es.”</p>
+          <footer>La idea de la vacante que más conecta conmigo.</footer>
+        </blockquote>
+        <div class="fit-points reveal" data-delay="1">
+          <article>
+            <span>01</span>
+            <div><h3>Entiendo antes de ejecutar</h3><p>Investigo usuarios, procesos y restricciones para definir el problema correcto antes de elegir la solución.</p></div>
+          </article>
+          <article>
+            <span>02</span>
+            <div><h3>Traduzco entre equipos</h3><p>Conecto lenguaje de negocio, experiencia, contenido y tecnología para que una idea pueda implementarse.</p></div>
+          </article>
+          <article>
+            <span>03</span>
+            <div><h3>Aprendo haciendo</h3><p>Uso IA como copiloto, prototipo en código y actualmente fortalezco frontend con The Frontend Developer Career Path de Scrimba.</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
 
-    /***********************
-     * Datos por defecto (suaves, editables)
-     ***********************/
-    function seedIfEmpty() {
-      const existing = loadJSON(LS.RECURRENT, null);
-      if (existing) return;
-
-      const data = {
-        categories: [
-          {
-            id: uid(),
-            icon: "🏠",
-            name: "Casa",
-            activities: [
-              { id: uid(), text: "Ventilar 5 min" },
-              { id: uid(), text: "Limpieza rápida 10 min" },
-            ],
-          },
-          {
-            id: uid(),
-            icon: "🐾",
-            name: "Mascotas",
-            activities: [
-              { id: uid(), text: "Agua fresca" },
-              { id: uid(), text: "Paseo / salida" },
-            ],
-          },
-          {
-            id: uid(),
-            icon: "🍳",
-            name: "Cocina",
-            activities: [
-              { id: uid(), text: "Revisar comida disponible" },
-              { id: uid(), text: "Lavar 3 cosas (mini)" },
-            ],
-          },
-        ],
-      };
-
-      saveJSON(LS.RECURRENT, data);
-
-      // Borradores/guardados limpios
-      saveJSON(LS.TODAY_DRAFT, { date: nowISODate(), excludedCategories: [], excludedActivities: {} });
-      localStorage.removeItem(LS.SAVED);
-    }
-
-    /***********************
-     * Estado global (simple)
-     ***********************/
-    const state = {
-      route: "home", // home | recurrent | today | saved
-    };
-
-    function getRouteFromHash() {
-      const h = (location.hash || "#/home").replace("#/", "");
-      if (["home", "recurrent", "today", "saved"].includes(h)) return h;
-      return "home";
-    }
-
-    function navigate(route) {
-      location.hash = "#/" + route;
-    }
-
-    /***********************
-     * Selectores de datos
-     ***********************/
-    function getRecurrent() {
-      return loadJSON(LS.RECURRENT, { categories: [] });
-    }
-
-    function setRecurrent(next) {
-      saveJSON(LS.RECURRENT, next);
-    }
-
-    function getTodayDraft() {
-      const draft = loadJSON(LS.TODAY_DRAFT, null);
-      const today = nowISODate();
-
-      // Si no existe o es de otro día, se reinicia automáticamente (sin drama).
-      if (!draft || draft.date !== today) {
-        const fresh = { date: today, excludedCategories: [], excludedActivities: {} };
-        saveJSON(LS.TODAY_DRAFT, fresh);
-        return fresh;
-      }
-      return draft;
-    }
-
-    function setTodayDraft(next) {
-      saveJSON(LS.TODAY_DRAFT, next);
-    }
-
-    function getSavedChecklist() {
-      return loadJSON(LS.SAVED, null);
-    }
-
-    function setSavedChecklist(next) {
-      saveJSON(LS.SAVED, next);
-    }
-
-    /***********************
-     * Construir checklist de hoy (snapshot desde recurrente - exclusiones)
-     ***********************/
-    function buildTodayFromRecurrent() {
-      const rec = getRecurrent();
-      const draft = getTodayDraft();
-
-      const excludedCatSet = new Set(draft.excludedCategories || []);
-      const excludedActivities = draft.excludedActivities || {};
-
-      const categories = rec.categories
-        .filter(c => !excludedCatSet.has(c.id))
-        .map(c => {
-          const exActs = new Set((excludedActivities[c.id] || []));
-          const activities = (c.activities || []).filter(a => !exActs.has(a.id));
-          return { ...c, activities };
-        })
-        // Si una categoría se queda sin actividades, aún la mostramos (para que se note),
-        // pero en guardado no conviene guardarla vacía: se filtrará al guardar.
-        ;
-
-      return categories;
-    }
-
-    /***********************
-     * Guardar UNA checklist (reemplaza la anterior)
-     ***********************/
-    function saveSingleChecklistFromToday() {
-      const categories = buildTodayFromRecurrent()
-        .map(c => ({
-          id: c.id,
-          icon: c.icon,
-          name: c.name,
-          activities: (c.activities || []).map(a => ({ id: a.id, text: a.text })),
-        }))
-        // No guardar categorías vacías
-        .filter(c => (c.activities || []).length > 0);
-
-      // Estados de completado por actividad
-      const completed = {}; // { [activityId]: true/false }
-      for (const c of categories) {
-        for (const a of c.activities) completed[a.id] = false;
-      }
-
-      const payload = {
-        savedAt: new Date().toISOString(),
-        categories,
-        completed,
-      };
-
-      setSavedChecklist(payload);
-      navigate("saved");
-    }
-
-    /***********************
-     * UI Helpers
-     ***********************/
-    function el(html) {
-      const t = document.createElement("template");
-      t.innerHTML = html.trim();
-      return t.content.firstElementChild;
-    }
-
-    function screenShell({ title, subtitle, theme, content, footer }) {
-      // theme: home|recurrent|today|saved
-      const themes = {
-        home: {
-          bg: "bg-slate-50",
-          bar: "bg-white/80 border-slate-200",
-          accent: "text-violet-700",
-          chip: "bg-violet-50 text-violet-700 border-violet-200",
-        },
-        recurrent: {
-          bg: "bg-sky-50",
-          bar: "bg-white/80 border-sky-200",
-          accent: "text-sky-700",
-          chip: "bg-sky-50 text-sky-700 border-sky-200",
-        },
-        today: {
-          bg: "bg-emerald-50",
-          bar: "bg-white/80 border-emerald-200",
-          accent: "text-emerald-700",
-          chip: "bg-emerald-50 text-emerald-700 border-emerald-200",
-        },
-        saved: {
-          bg: "bg-amber-50",
-          bar: "bg-white/80 border-amber-200",
-          accent: "text-amber-800",
-          chip: "bg-amber-50 text-amber-800 border-amber-200",
-        },
-      };
-      const th = themes[theme] || themes.home;
-
-      const root = el(`
-        <div class="${th.bg} screen">
-          <div class="sticky top-0 z-10 backdrop-blur border-b ${th.bar}">
-            <div class="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-              ${theme === "home" ? "" : `<button data-back class="shrink-0 rounded-xl border px-3 py-2 text-sm bg-white hover:bg-slate-50 active:scale-[0.99]">←</button>`}
-              <div class="min-w-0">
-                <h1 class="text-xl font-semibold tracking-tight ${th.accent}">${title}</h1>
-                ${subtitle ? `<p class="text-sm text-slate-600 mt-0.5">${subtitle}</p>` : ""}
-              </div>
-              <div class="ml-auto">
-                <span class="inline-flex items-center gap-2 text-xs px-3 py-1 border rounded-full ${th.chip}">
-                  <span class="h-2 w-2 rounded-full bg-current opacity-60"></span>
-                  ${theme === "home" ? "Bienvenido" :
-                    theme === "recurrent" ? "Recurrente" :
-                    theme === "today" ? "Hoy" : "Guardada"}
-                </span>
-              </div>
-            </div>
+    <section class="projects section-pad" id="proyectos" aria-labelledby="projects-title">
+      <div class="section-shell">
+        <div class="section-heading projects-heading reveal">
+          <div>
+            <p class="eyebrow">Trabajo seleccionado</p>
+            <h2 id="projects-title">Evidencia, no promesas.</h2>
           </div>
-
-          <main class="max-w-2xl mx-auto px-4 py-6 space-y-4">
-            ${content}
-          </main>
-
-          ${footer ? `<footer class="max-w-2xl mx-auto px-4 pb-8 pt-2">${footer}</footer>` : `<div class="h-6"></div>`}
-        </div>
-      `);
-
-      // Back: vuelve a Home por simplicidad cognitiva (en vez de historial largo)
-      const backBtn = root.querySelector("[data-back]");
-      if (backBtn) backBtn.addEventListener("click", () => navigate("home"));
-      return root;
-    }
-
-    function emptyStateCard(message, themeAccent = "text-slate-700") {
-      return `
-        <div class="card border bg-white p-5">
-          <p class="text-sm ${themeAccent}">${message}</p>
-        </div>
-      `;
-    }
-
-    /***********************
-     * Pantalla Home
-     ***********************/
-    function renderHome() {
-      const content = `
-        <div class="card border bg-white p-6">
-          <h2 class="text-2xl font-semibold tracking-tight text-slate-900">¿Qué toca hoy?</h2>
-          <p class="text-sm text-slate-600 mt-2">
-            Checklist diaria con enfoque visual, simple y calmado.
-          </p>
+          <p>Cada caso muestra una forma distinta de pasar de una necesidad ambigua a una experiencia concreta.</p>
         </div>
 
-        <div class="grid gap-3">
-          <button data-go="saved"
-            class="btn-big w-full text-left border bg-white p-5 hover:bg-slate-50 active:scale-[0.99]">
-            <div class="flex items-center gap-3">
-              <div class="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-xl">✅</div>
-              <div>
-                <div class="text-lg font-semibold text-slate-900">Checklist guardada</div>
-                <div class="text-sm text-slate-600">Ver y marcar actividades</div>
-              </div>
-            </div>
-          </button>
-
-          <button data-go="today"
-            class="btn-big w-full text-left border bg-white p-5 hover:bg-slate-50 active:scale-[0.99]">
-            <div class="flex items-center gap-3">
-              <div class="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-xl">🟩</div>
-              <div>
-                <div class="text-lg font-semibold text-slate-900">Checklist de hoy</div>
-                <div class="text-sm text-slate-600">Elegir qué entra hoy</div>
-              </div>
-            </div>
-          </button>
-
-          <button data-go="recurrent"
-            class="btn-big w-full text-left border bg-white p-5 hover:bg-slate-50 active:scale-[0.99]">
-            <div class="flex items-center gap-3">
-              <div class="h-12 w-12 rounded-2xl bg-violet-50 border border-violet-200 flex items-center justify-center text-xl">🔁</div>
-              <div>
-                <div class="text-lg font-semibold text-slate-900">Actividades recurrentes</div>
-                <div class="text-sm text-slate-600">Editar categorías y actividades</div>
-              </div>
-            </div>
-          </button>
-        </div>
-      `;
-
-      const root = screenShell({
-        title: "Bienvenido",
-        subtitle: "Elige una pantalla",
-        theme: "home",
-        content,
-        footer: `
-          <div class="flex items-center justify-between text-xs text-slate-500">
-            <span>Todo se guarda en este dispositivo (LocalStorage).</span>
-            <button data-reset class="underline hover:text-slate-700">Restablecer datos</button>
+        <article class="featured-project reveal">
+          <div class="project-image image-calculator">
+            <img src="assets/carbon-calculator.png" alt="Interfaz de resultados de la calculadora de huella de carbono" loading="lazy">
+            <span class="project-number">01</span>
           </div>
-        `,
-      });
+          <div class="project-copy">
+            <div class="pill-row"><span>UX / LX</span><span>B2B</span><span>IA aplicada</span></div>
+            <h3>Calculadora de huella de carbono</h3>
+            <p>Transformé un cálculo técnico del sector energético en un recorrido guiado, educativo y accionable para usuarios empresariales.</p>
+            <dl class="metrics">
+              <div><dt>+15%</dt><dd>leads calificados</dd></div>
+              <div><dt>−25%</dt><dd>tiempo de prospección</dd></div>
+            </dl>
+            <button class="text-link project-open" data-project="carbon">Ver el caso <span aria-hidden="true">↗</span></button>
+          </div>
+        </article>
 
-      root.querySelectorAll("[data-go]").forEach(btn => {
-        btn.addEventListener("click", () => navigate(btn.getAttribute("data-go")));
-      });
-
-      root.querySelector("[data-reset]").addEventListener("click", () => {
-        // Reset suave: confirmación mínima sin mensajes motivacionales
-        const ok = confirm("Esto borrará categorías, actividades y checklist guardada. ¿Continuar?");
-        if (!ok) return;
-        localStorage.removeItem(LS.RECURRENT);
-        localStorage.removeItem(LS.TODAY_DRAFT);
-        localStorage.removeItem(LS.SAVED);
-        seedIfEmpty();
-        render();
-      });
-
-      return root;
-    }
-
-    /***********************
-     * Pantalla Actividades recurrentes
-     ***********************/
-    function renderRecurrent() {
-      const rec = getRecurrent();
-      const categories = rec.categories || [];
-
-      let content = "";
-
-      if (categories.length === 0) {
-        content += emptyStateCard("No hay categorías todavía. Crea una categoría para empezar.", "text-sky-800");
-      }
-
-      content += categories.map(cat => {
-        const acts = cat.activities || [];
-        const items = acts.length
-          ? acts.map(a => `
-              <li class="flex items-center justify-between gap-3 py-2">
-                <span class="text-sm text-slate-800">• ${escapeHTML(a.text)}</span>
-                <button data-del-activity="${cat.id}::${a.id}"
-                  class="shrink-0 rounded-xl border px-3 py-1.5 text-sm bg-white hover:bg-slate-50">
-                  –
-                </button>
-              </li>
-            `).join("")
-          : `<li class="py-2 text-sm text-slate-500">Sin actividades</li>`;
-
-        return `
-          <section class="card border bg-white p-5" data-cat="${cat.id}">
-            <div class="flex items-start gap-3">
-              <div class="h-12 w-12 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-2xl" data-icon>
-                ${escapeHTML(cat.icon || "📌")}
+        <div class="project-grid">
+          <article class="project-card reveal">
+            <div class="project-thumb app-preview today-preview" aria-label="Vista previa de la app ¿Qué toca hoy?">
+              <div class="mini-phone">
+                <span>9:41</span>
+                <div class="mini-app-head"><i></i><i></i><i></i></div>
+                <h4>¿Qué toca hoy?</h4>
+                <p>Elige una opción para comenzar</p>
+                <b class="mini-action yellow">Checklist guardada</b>
+                <b class="mini-action green">Checklist de hoy</b>
+                <b class="mini-action blue">Actividades recurrentes</b>
               </div>
-
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <h3 class="font-semibold text-slate-900 truncate" data-name>${escapeHTML(cat.name || "Categoría")}</h3>
-                  <button data-edit-cat="${cat.id}"
-                    class="rounded-xl border px-2.5 py-1.5 text-sm bg-white hover:bg-slate-50"
-                    title="Editar nombre e ícono">
-                    ✏️
-                  </button>
-                </div>
-                <ul class="mt-3 divide-y">
-                  ${items}
-                </ul>
-
-                <div class="mt-4 flex gap-2">
-                  <button data-add-activity="${cat.id}"
-                    class="rounded-2xl border px-4 py-2 text-sm bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100">
-                    + Agregar actividad
-                  </button>
-
-                  <button data-del-cat="${cat.id}"
-                    class="rounded-2xl border px-4 py-2 text-sm bg-white hover:bg-slate-50">
-                    Eliminar categoría
-                  </button>
-                </div>
+              <span class="project-number">02</span>
+            </div>
+            <div class="card-body">
+              <div class="pill-row"><span>Producto</span><span>Frontend</span><span>Accesibilidad</span></div>
+              <h3>¿Qué toca hoy?</h3>
+              <p>Una app responsive para reducir la carga cognitiva al organizar tareas recurrentes. Diseñada desde UX y construida con IA + código.</p>
+              <div class="card-links">
+                <a class="text-link" href="que toca hoy check list app/index.html" target="_blank" rel="noreferrer">Probar app <span aria-hidden="true">↗</span></a>
+                <button class="text-link project-open" data-project="today">Proceso</button>
               </div>
             </div>
-          </section>
-        `;
-      }).join("");
+          </article>
 
-      const root = screenShell({
-        title: "Actividades recurrentes",
-        subtitle: "Crea y ajusta tu base (se guarda automáticamente)",
-        theme: "recurrent",
-        content: content + `
-          <div class="pt-2">
-            <button data-new-cat
-              class="w-full rounded-2xl border px-5 py-4 text-left bg-sky-600 text-white hover:bg-sky-700 active:scale-[0.99]">
-              <div class="text-base font-semibold">Nueva categoría</div>
-              <div class="text-sm opacity-90">Agregar una sección con ícono</div>
+          <article class="project-card reveal" data-delay="1">
+            <div class="project-thumb app-preview thesis-preview" aria-label="Vista previa de Tesis Tracker">
+              <div class="tracker-ui">
+                <span class="tracker-label">TESIS · DISEÑO EDITORIAL</span>
+                <strong>Tu avance, capítulo por capítulo.</strong>
+                <div class="tracker-progress"><i></i></div>
+                <div class="tracker-row"><b>01</b><span>Investigación</span><em>7/9</em></div>
+                <div class="tracker-row"><b>02</b><span>Marco teórico</span><em>4/8</em></div>
+                <div class="tracker-row"><b>03</b><span>Diseño</span><em>3/10</em></div>
+              </div>
+              <span class="project-number">03</span>
+            </div>
+            <div class="card-body">
+              <div class="pill-row"><span>UX writing</span><span>Frontend</span><span>Responsive</span></div>
+              <h3>Tesis Tracker</h3>
+              <p>Un producto mobile-first que convierte un proceso editorial largo en tareas visibles, progreso medible y próximos pasos claros.</p>
+              <div class="card-links">
+                <a class="text-link" href="tesis diseño editorial tracker/index.html" target="_blank" rel="noreferrer">Probar app <span aria-hidden="true">↗</span></a>
+                <button class="text-link project-open" data-project="thesis">Proceso</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="project-card project-card-wide reveal">
+            <div class="project-thumb image-tailor">
+              <img src="assets/tailor-talk.png" alt="Pantallas de la app de aprendizaje Tailor Talk" loading="lazy">
+              <span class="project-number">04</span>
+            </div>
+            <div class="card-body">
+              <div class="pill-row"><span>UX Research</span><span>EdTech</span><span>Prototipo</span></div>
+              <h3>Tailor Talk</h3>
+              <p>Investigación y diseño de una experiencia de aprendizaje de idiomas que adapta materiales al nivel, contexto y objetivo del estudiante.</p>
+              <button class="text-link project-open" data-project="tailor">Ver el caso <span aria-hidden="true">↗</span></button>
+            </div>
+          </article>
+        </div>
+
+        <div class="more-work reveal">
+          <div>
+            <p class="eyebrow">Más exploraciones</p>
+            <h3>También diseño para aprender, moverse y comprender.</h3>
+          </div>
+          <div class="work-list">
+            <button class="work-item project-open" data-project="solar">
+              <span class="work-index">05</span><span class="work-name">Videojuego de red eléctrica</span><span class="work-tags">Gamificación · Construct 3 · IA</span><span aria-hidden="true">↗</span>
+            </button>
+            <button class="work-item project-open" data-project="ecobici">
+              <span class="work-index">06</span><span class="work-name">ECOBICI en movimiento</span><span class="work-tags">Movilidad · Investigación · Wearable</span><span aria-hidden="true">↗</span>
+            </button>
+            <button class="work-item project-open" data-project="web">
+              <span class="work-index">07</span><span class="work-name">Ecosistema web Tuto Power</span><span class="work-tags">B2B · WordPress · Contenido</span><span aria-hidden="true">↗</span>
             </button>
           </div>
-        `,
-      });
-
-      // Handlers
-      root.querySelectorAll("[data-add-activity]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const catId = btn.getAttribute("data-add-activity");
-          const text = prompt("Nueva actividad (texto corto):");
-          if (!text) return;
-
-          const next = getRecurrent();
-          const cat = next.categories.find(c => c.id === catId);
-          if (!cat) return;
-          cat.activities = cat.activities || [];
-          cat.activities.push({ id: uid(), text: text.trim() });
-          setRecurrent(next);
-          render();
-        });
-      });
-
-      root.querySelectorAll("[data-del-activity]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const [catId, actId] = btn.getAttribute("data-del-activity").split("::");
-          const next = getRecurrent();
-          const cat = next.categories.find(c => c.id === catId);
-          if (!cat) return;
-          cat.activities = (cat.activities || []).filter(a => a.id !== actId);
-          setRecurrent(next);
-          render();
-        });
-      });
-
-      root.querySelectorAll("[data-del-cat]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const catId = btn.getAttribute("data-del-cat");
-          const ok = confirm("¿Eliminar esta categoría y sus actividades?");
-          if (!ok) return;
-          const next = getRecurrent();
-          next.categories = (next.categories || []).filter(c => c.id !== catId);
-          setRecurrent(next);
-
-          // Limpieza: si estaba excluida o en draft, quitar referencias
-          const draft = getTodayDraft();
-          draft.excludedCategories = (draft.excludedCategories || []).filter(id => id !== catId);
-          delete (draft.excludedActivities || {})[catId];
-          setTodayDraft(draft);
-
-          render();
-        });
-      });
-
-      root.querySelectorAll("[data-edit-cat]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const catId = btn.getAttribute("data-edit-cat");
-          const next = getRecurrent();
-          const cat = next.categories.find(c => c.id === catId);
-          if (!cat) return;
-
-          const name = prompt("Nombre de la categoría:", cat.name || "");
-          if (name === null) return; // cancel
-          const icon = prompt("Sticker / ícono (emoji):", cat.icon || "📌");
-          if (icon === null) return;
-
-          cat.name = name.trim() || "Categoría";
-          cat.icon = (icon.trim() || "📌").slice(0, 3);
-          setRecurrent(next);
-          render();
-        });
-      });
-
-      root.querySelector("[data-new-cat]").addEventListener("click", () => {
-        const name = prompt("Nombre de la nueva categoría:");
-        if (!name) return;
-        const icon = prompt("Sticker / ícono (emoji):", "📌");
-        if (icon === null) return;
-
-        const next = getRecurrent();
-        next.categories = next.categories || [];
-        next.categories.push({
-          id: uid(),
-          name: name.trim() || "Categoría",
-          icon: (icon.trim() || "📌").slice(0, 3),
-          activities: [],
-        });
-        setRecurrent(next);
-        render();
-      });
-
-      return root;
-    }
-
-    /***********************
-     * Pantalla Checklist de hoy (excluir sin borrar recurrente)
-     ***********************/
-    function renderToday() {
-      const draft = getTodayDraft();
-      const cats = buildTodayFromRecurrent();
-      const rec = getRecurrent();
-
-      // Para mostrar también categorías excluidas (opcional visual): aquí solo mostramos las incluidas (más limpio)
-      let content = `
-        <div class="card border bg-white p-5">
-          <div class="flex items-center justify-between gap-3">
-            <div>
-              <h2 class="font-semibold text-slate-900">Selección de hoy</h2>
-              <p class="text-sm text-slate-600">Quita lo que no entra hoy. No se borra lo recurrente.</p>
-            </div>
-            <span class="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-              ${draft.date}
-            </span>
-          </div>
         </div>
-      `;
+      </div>
+    </section>
 
-      if ((rec.categories || []).length === 0) {
-        content += emptyStateCard("No hay actividades recurrentes. Ve a “Actividades recurrentes” para crear tu base.", "text-emerald-800");
-      } else if (cats.length === 0) {
-        content += emptyStateCard("Hoy no quedó nada en la checklist. Puedes volver y re-incluir desde tus recurrentes.", "text-emerald-800");
-      }
-
-      content += cats.map(cat => {
-        const acts = cat.activities || [];
-        return `
-          <section class="card border bg-white p-5">
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl">
-                  ${escapeHTML(cat.icon || "📌")}
-                </div>
-                <div class="min-w-0">
-                  <h3 class="font-semibold text-slate-900 truncate">${escapeHTML(cat.name || "Categoría")}</h3>
-                  <p class="text-xs text-slate-500">Quitar categoría o actividades</p>
-                </div>
-              </div>
-
-              <button data-exclude-cat="${cat.id}"
-                class="shrink-0 rounded-xl border px-3 py-2 text-sm bg-white hover:bg-slate-50"
-                title="Excluir categoría del día">
-                –
-              </button>
-            </div>
-
-            <ul class="mt-4 divide-y">
-              ${acts.length ? acts.map(a => `
-                <li class="flex items-center justify-between gap-3 py-2">
-                  <span class="text-sm text-slate-800">${escapeHTML(a.text)}</span>
-                  <button data-exclude-act="${cat.id}::${a.id}"
-                    class="shrink-0 rounded-xl border px-3 py-1.5 text-sm bg-white hover:bg-slate-50"
-                    title="Excluir actividad del día">
-                    –
-                  </button>
-                </li>
-              `).join("") : `
-                <li class="py-2 text-sm text-slate-500">Sin actividades (excluiste todas)</li>
-              `}
-            </ul>
-          </section>
-        `;
-      }).join("");
-
-      const footer = `
-        <button data-save
-          class="w-full rounded-2xl px-5 py-4 text-left bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]">
-          <div class="text-base font-semibold">Guardar</div>
-          <div class="text-sm opacity-90">Guardar esta checklist (reemplaza la anterior)</div>
-        </button>
-
-        <div class="mt-3 grid grid-cols-2 gap-3">
-          <button data-reset-today
-            class="rounded-2xl border px-4 py-3 text-sm bg-white hover:bg-slate-50">
-            Revertir exclusiones (hoy)
-          </button>
-          <button data-go-recurrent
-            class="rounded-2xl border px-4 py-3 text-sm bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100">
-            Editar recurrente
-          </button>
+    <section class="section-shell section-pad cv-section" id="cv" aria-labelledby="cv-title">
+      <div class="section-heading cv-heading reveal">
+        <div>
+          <p class="eyebrow">CV interactivo · actualizado septiembre 2026</p>
+          <h2 id="cv-title">Una trayectoria que conecta personas, contenido y tecnología.</h2>
         </div>
-      `;
+        <a class="button button-secondary" href="assets/CV-Ariadna-Anauf-2026.pdf" download>Descargar PDF</a>
+      </div>
 
-      const root = screenShell({
-        title: "Checklist de hoy",
-        subtitle: "Define lo que sí entra hoy",
-        theme: "today",
-        content,
-        footer,
-      });
+      <div class="cv-tabs reveal" role="tablist" aria-label="Secciones del currículum">
+        <button role="tab" aria-selected="true" aria-controls="panel-experience" id="tab-experience" data-tab="experience">Experiencia</button>
+        <button role="tab" aria-selected="false" aria-controls="panel-education" id="tab-education" data-tab="education">Formación</button>
+        <button role="tab" aria-selected="false" aria-controls="panel-skills" id="tab-skills" data-tab="skills">Herramientas</button>
+      </div>
 
-      root.querySelectorAll("[data-exclude-cat]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const catId = btn.getAttribute("data-exclude-cat");
-          const d = getTodayDraft();
-          d.excludedCategories = Array.from(new Set([...(d.excludedCategories || []), catId]));
-          setTodayDraft(d);
-          render();
-        });
-      });
-
-      root.querySelectorAll("[data-exclude-act]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const [catId, actId] = btn.getAttribute("data-exclude-act").split("::");
-          const d = getTodayDraft();
-          d.excludedActivities = d.excludedActivities || {};
-          d.excludedActivities[catId] = Array.from(new Set([...(d.excludedActivities[catId] || []), actId]));
-          setTodayDraft(d);
-          render();
-        });
-      });
-
-      root.querySelector("[data-save]").addEventListener("click", () => {
-        saveSingleChecklistFromToday();
-      });
-
-      root.querySelector("[data-reset-today]").addEventListener("click", () => {
-        const fresh = { date: nowISODate(), excludedCategories: [], excludedActivities: {} };
-        setTodayDraft(fresh);
-        render();
-      });
-
-      root.querySelector("[data-go-recurrent]").addEventListener("click", () => {
-        navigate("recurrent");
-      });
-
-      return root;
-    }
-
-    /***********************
-     * Pantalla Checklist guardada
-     ***********************/
-    function renderSaved() {
-      const saved = getSavedChecklist();
-
-      let content = "";
-      if (!saved || !saved.categories || saved.categories.length === 0) {
-        content += emptyStateCard("No hay checklist guardada. Ve a “Checklist de hoy” y presiona Guardar.", "text-amber-900");
-      } else {
-        content += `
-          <div class="card border bg-white p-5">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h2 class="font-semibold text-slate-900">Checklist guardada</h2>
-                <p class="text-sm text-slate-600">Marca actividades con un check. Sin métricas.</p>
-              </div>
-              <span class="text-xs text-amber-900 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-                ${new Date(saved.savedAt).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })}
-              </span>
-            </div>
-          </div>
-        `;
-
-        const completed = saved.completed || {};
-
-        content += saved.categories.map(cat => {
-          const acts = cat.activities || [];
-          const allDone = acts.length > 0 && acts.every(a => !!completed[a.id]);
-
-          return `
-            <section class="card border bg-white p-5">
-              <div class="flex items-start gap-3">
-                <div class="h-12 w-12 rounded-2xl border flex items-center justify-center text-2xl
-                  ${allDone ? "bg-amber-200 border-amber-300" : "bg-amber-50 border-amber-200"}"
-                  title="${allDone ? "Categoría completa" : "Categoría pendiente"}">
-                  ${escapeHTML(cat.icon || "📌")}
-                </div>
-                <div class="min-w-0">
-                  <h3 class="font-semibold text-slate-900 truncate">${escapeHTML(cat.name || "Categoría")}</h3>
-                  <p class="text-xs text-slate-500">${allDone ? "Completa" : "Pendiente"}</p>
-                </div>
-              </div>
-
-              <ul class="mt-4 space-y-2">
-                ${acts.map(a => {
-                  const isDone = !!completed[a.id];
-                  return `
-                    <li class="flex items-center justify-between gap-3 p-3 rounded-2xl border
-                      ${isDone ? "bg-slate-50" : "bg-white"}">
-                      <div class="flex items-center gap-3 min-w-0">
-                        <button data-toggle="${a.id}"
-                          class="h-8 w-8 rounded-xl border flex items-center justify-center text-lg
-                            ${isDone ? "bg-slate-200 border-slate-300" : "bg-white border-slate-300"}"
-                          aria-label="Marcar actividad">
-                          ${isDone ? "✓" : ""}
-                        </button>
-                        <span class="text-sm truncate ${isDone ? "text-slate-500" : "text-slate-900"}">
-                          ${escapeHTML(a.text)}
-                        </span>
-                      </div>
-                    </li>
-                  `;
-                }).join("")}
-              </ul>
-            </section>
-          `;
-        }).join("");
-      }
-
-      const footer = `
-        <button data-edit
-          class="w-full rounded-2xl px-5 py-4 text-left bg-amber-600 text-white hover:bg-amber-700 active:scale-[0.99]">
-          <div class="text-base font-semibold">Editar checklist</div>
-          <div class="text-sm opacity-90">Regresar a “Checklist de hoy”</div>
-        </button>
-
-        <div class="mt-3">
-          <button data-clear-saved
-            class="w-full rounded-2xl border px-4 py-3 text-sm bg-white hover:bg-slate-50">
-            Borrar checklist guardada
-          </button>
+      <div class="cv-panels reveal" data-delay="1">
+        <div class="cv-panel active" id="panel-experience" role="tabpanel" aria-labelledby="tab-experience">
+          <article class="timeline-item current">
+            <div class="timeline-date">ENE 2026<br>AHORA</div>
+            <div><p class="timeline-kicker">Tuto Power · Energía</p><h3>Analista de Experiencia Digital</h3><p>Analizo recorridos y necesidades del negocio; diseño flujos, prototipos y contenidos; e integro IA para hacer más claros y eficientes los productos y procesos digitales.</p></div>
+          </article>
+          <article class="timeline-item">
+            <div class="timeline-date">2022<br>2025</div>
+            <div><p class="timeline-kicker">Tuto Power · Energía</p><h3>UX, producto y estrategia digital</h3><p>Rediseño web B2B, calculadora de huella de carbono, sistemas de contenido, investigación con stakeholders, prototipos, pruebas y experiencias educativas.</p></div>
+          </article>
+          <article class="timeline-item">
+            <div class="timeline-date">2021<br>AHORA</div>
+            <div><p class="timeline-kicker">Proyectos independientes</p><h3>Educación, contenido y producto</h3><p>Diseño de apps educativas, productos de organización, investigación UX y prototipos funcionales para convertir conocimiento complejo en experiencias comprensibles.</p></div>
+          </article>
+          <article class="timeline-item">
+            <div class="timeline-date">2021</div>
+            <div><p class="timeline-kicker">Alcaldía Miguel Hidalgo</p><h3>Comunicación e investigación de audiencias</h3><p>Análisis de audiencias, contenido digital, comunicación estratégica y coordinación de materiales orientados a necesidades ciudadanas.</p></div>
+          </article>
         </div>
-      `;
 
-      const root = screenShell({
-        title: "Checklist guardada",
-        subtitle: "Estados visuales: pendiente / completada",
-        theme: "saved",
-        content,
-        footer,
-      });
+        <div class="cv-panel" id="panel-education" role="tabpanel" aria-labelledby="tab-education" hidden>
+          <article class="education-card featured"><span>EN CURSO · 2026</span><h3>The Frontend Developer Career Path</h3><p>Scrimba · HTML, CSS, JavaScript, accesibilidad y construcción de productos web.</p></article>
+          <article class="education-card"><span>ESPECIALIZACIÓN</span><h3>Máster en IA para Creativos</h3><p>Founderz × Microsoft · IA aplicada, automatización, ideación y prototipado.</p></article>
+          <article class="education-card"><span>CERTIFICACIÓN</span><h3>UX/UI Design Bootcamp</h3><p>Investigación, arquitectura de información, interacción, prototipado y validación.</p></article>
+          <article class="education-card"><span>LICENCIATURA</span><h3>Comunicación</h3><p>Universidad Latinoamericana · narrativa, investigación y estrategia.</p></article>
+          <article class="education-card"><span>FORMACIÓN DOCENTE</span><h3>Teacher’s Diploma Course</h3><p>Angloeducativo · pedagogía, inglés y diseño de experiencias de aprendizaje.</p></article>
+        </div>
 
-      // Toggle completado
-      root.querySelectorAll("[data-toggle]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const aId = btn.getAttribute("data-toggle");
-          const current = getSavedChecklist();
-          if (!current) return;
+        <div class="cv-panel" id="panel-skills" role="tabpanel" aria-labelledby="tab-skills" hidden>
+          <div class="skill-group"><span>01</span><div><h3>Entender</h3><p>Entrevistas · análisis cualitativo · desk research · benchmarking · journey maps · jobs-to-be-done</p></div></div>
+          <div class="skill-group"><span>02</span><div><h3>Diseñar</h3><p>Arquitectura de información · flujos · wireframes · prototipos · UX writing · diseño conversacional · accesibilidad</p></div></div>
+          <div class="skill-group"><span>03</span><div><h3>Construir</h3><p>HTML · CSS · JavaScript · WordPress · Construct 3 · Figma · Git/GitHub en aprendizaje activo</p></div></div>
+          <div class="skill-group"><span>04</span><div><h3>Acelerar con IA</h3><p>Prompt design · copilotos de código · ideación · síntesis · flujos con humano en el loop · documentación</p></div></div>
+          <div class="skill-group"><span>05</span><div><h3>Comunicar</h3><p>Español nativo · Inglés C1 · Italiano B2 · Francés B1</p></div></div>
+        </div>
+      </div>
+    </section>
 
-          current.completed = current.completed || {};
-          current.completed[aId] = !current.completed[aId];
-          setSavedChecklist(current);
-          render(); // re-render para actualizar estilos + sticker completo
-        });
-      });
+    <section class="principles section-pad" aria-labelledby="principles-title">
+      <div class="section-shell">
+        <p class="eyebrow reveal">Cómo trabajo</p>
+        <h2 id="principles-title" class="reveal">Curiosidad para preguntar.<br> Criterio para decidir.<br> Código para comprobar.</h2>
+        <div class="principle-grid">
+          <article class="reveal"><span>01</span><h3>Humana</h3><p>Diseño con empatía, lenguaje claro y respeto por la energía mental de las personas.</p></article>
+          <article class="reveal" data-delay="1"><span>02</span><h3>Estratégica</h3><p>Conecto cada decisión con un objetivo de negocio, una necesidad y una forma de validarla.</p></article>
+          <article class="reveal" data-delay="2"><span>03</span><h3>En evolución</h3><p>No finjo saberlo todo. Aprendo rápido, documento y convierto lo aprendido en algo que funciona.</p></article>
+        </div>
+      </div>
+    </section>
 
-      root.querySelector("[data-edit]").addEventListener("click", () => {
-        navigate("today");
-      });
+    <section class="contact section-shell section-pad" id="contacto" aria-labelledby="contact-title">
+      <div class="contact-card reveal">
+        <p class="eyebrow">Siguiente paso</p>
+        <h2 id="contact-title">José, me interesa ayudar a que más empresas <em>dominen la tecnología</em>.</h2>
+        <p>Si buscas a alguien con pensamiento de producto, sensibilidad humana y hambre real por construir, me encantará conversar sobre el reto.</p>
+        <div class="contact-actions">
+          <a class="button button-light" href="mailto:annaufdg@gmail.com?subject=Hablemos%20sobre%20la%20vacante%20en%20Innavanti">Escríbeme por correo <span aria-hidden="true">↗</span></a>
+          <a class="button button-outline-light" href="https://www.linkedin.com/in/anauf-ux" target="_blank" rel="noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="contact-meta"><span>Ciudad de México</span><a href="mailto:annaufdg@gmail.com">annaufdg@gmail.com</a><span>Disponible para conversar</span></div>
+      </div>
+    </section>
+  </main>
 
-      root.querySelector("[data-clear-saved]").addEventListener("click", () => {
-        const ok = confirm("¿Borrar la checklist guardada?");
-        if (!ok) return;
-        localStorage.removeItem(LS.SAVED);
-        render();
-      });
+  <footer class="site-footer section-shell">
+    <p>Diseñado y construido por Ariadna Anauf con criterio, café e IA.</p>
+    <p>© <span id="year">2026</span></p>
+    <a href="#inicio">Volver arriba ↑</a>
+  </footer>
 
-      return root;
-    }
-
-    /***********************
-     * Render principal
-     ***********************/
-    function render() {
-      state.route = getRouteFromHash();
-      const app = document.getElementById("app");
-      app.innerHTML = "";
-
-      const screen =
-        state.route === "home" ? renderHome() :
-        state.route === "recurrent" ? renderRecurrent() :
-        state.route === "today" ? renderToday() :
-        renderSaved();
-
-      app.appendChild(screen);
-    }
-
-    window.addEventListener("hashchange", render);
-
-    /***********************
-     * Seguridad básica: escape HTML (evita inyección si pegan texto raro)
-     ***********************/
-    function escapeHTML(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    /***********************
-     * Bienvenido
-     ***********************/
-    seedIfEmpty();
-    // Si abres el archivo sin hash, manda a home
-    if (!location.hash) location.hash = "#/home";
-    render();
-  </script>
+  <dialog class="project-dialog" aria-labelledby="dialog-title">
+    <button class="dialog-close" aria-label="Cerrar caso">×</button>
+    <div class="dialog-media" id="dialog-media"></div>
+    <div class="dialog-content">
+      <p class="eyebrow" id="dialog-eyebrow"></p>
+      <h2 id="dialog-title"></h2>
+      <p class="dialog-intro" id="dialog-intro"></p>
+      <div class="dialog-grid">
+        <div><h3>El reto</h3><p id="dialog-challenge"></p></div>
+        <div><h3>Mi aportación</h3><p id="dialog-role"></p></div>
+        <div><h3>Decisión clave</h3><p id="dialog-decision"></p></div>
+        <div><h3>Resultado</h3><p id="dialog-result"></p></div>
+      </div>
+      <div class="dialog-actions" id="dialog-actions"></div>
+    </div>
+  </dialog>
 </body>
 </html>
